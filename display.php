@@ -7,7 +7,18 @@ if(!$conn)
     die("Connection failed: " . mysqli_connect_error());
 }
 
-$result = mysqli_query($conn,"SELECT * FROM users ORDER BY id DESC");
+$records_per_page = 5;
+
+$page = isset($_GET['page']) ? $_GET['page'] : 1;
+
+$start_from = ($page - 1) * $records_per_page;
+
+$result = mysqli_query(
+    $conn,
+    "SELECT * FROM users
+     ORDER BY id DESC
+     LIMIT $start_from, $records_per_page"
+);
 
 ?>
 
@@ -127,6 +138,47 @@ else
 ?>
 
 </table>
+<?php
+
+$total_records_query = mysqli_query(
+    $conn,
+    "SELECT COUNT(*) AS total FROM users"
+);
+
+$total_records = mysqli_fetch_assoc($total_records_query)['total'];
+
+$total_pages = ceil($total_records / $records_per_page);
+
+?>
+
+<nav>
+
+<ul class="pagination justify-content-center">
+
+<?php
+
+for($i = 1; $i <= $total_pages; $i++)
+{
+?>
+
+<li class="page-item <?php if($i==$page) echo 'active'; ?>">
+
+<a class="page-link"
+   href="display.php?page=<?php echo $i; ?>">
+
+   <?php echo $i; ?>
+
+</a>
+
+</li>
+
+<?php
+}
+?>
+
+</ul>
+
+</nav>
 
 </div>
 
